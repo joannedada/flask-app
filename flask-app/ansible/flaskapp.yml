@@ -1,0 +1,78 @@
+---
+- name: Setup PostgreSQL and Deploy Flask App
+  hosts: all
+  become: yes
+  tasks:
+  - name: Install Python
+    package: 
+        name: python3
+        state: present
+
+  - name: Install PostgreSQL
+    apt:
+      name: postgresql
+      state: present
+    when: inventory_hostname in groups['dbserver']
+
+  - name: Start PostgreSQL service
+    service:
+      name: postgresql
+      state: started
+      enabled: yes
+    when: inventory_hostname in groups['dbserver']
+  
+  - name: Install pip and Flask (only on Flask servers)
+    package:
+        name: python3-pip
+        state: present
+    when: inventory_hostname in groups['flaskservers']
+
+  - name: Install Flask using pip (only on Flask servers)
+    pip:
+        name: flask
+    when: inventory_hostname in groups['flaskservers']
+
+  - name: Copy init.sql file to DB server
+    copy:
+      src: init.sql
+      dest: /tmp/init.sql
+      owner: postgres
+      group: postgres
+      mode: 0644
+    when: inventory_hostname in groups['dbservers']
+
+  - name: Initialize PostgreSQL Database
+    become_user: postgres
+    command: psql -f /tmp/init.sql
+    when: inventory_hostname in groups['dbservers']
+
+  - name: Install Docker
+    yum:
+      name: docker
+      state: present
+    when: inventory_hostname in groups['flaskservers']
+
+  - name: Start Docker service
+    service:
+      name: docker
+      state: started
+      enabled: yes
+    when: inventory_hostname in groups['flaskservers']
+
+  - name: Pull the latest Flask app image from Docker Hub
+    command: "docker pull your-dockerhub-username/flask-app:latest"
+    when: inventory_hostname in groups['flaskservers']
+
+  - name: Remove existing container (if running)
+    command: "docker rm -f flask-container"
+    ignore_errors: yes
+    when: inventory_hostname in groups['flaskservers']
+
+  - name: Run Flask container
+    command: >
+      docker run -d --name flask-container -p 5000:5000
+      -e DB_HOST={{ hostvars[groups['db'][0]]['ansible_host'] }}
+      your-dockerhub-username/flask-app:latest
+    when: inventory_hostname in groups['flaskservers']
+...
+
