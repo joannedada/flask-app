@@ -25,12 +25,12 @@
     package:
         name: python3-pip
         state: present
-    when: inventory_hostname in groups['flaskservers']
+    when: inventory_hostname in groups['flask_servers']
 
   - name: Install Flask using pip (only on Flask servers)
     pip:
         name: flask
-    when: inventory_hostname in groups['flaskservers']
+    when: inventory_hostname in groups['flask_servers']
 
   - name: Copy init.sql file to DB server
     copy:
@@ -39,40 +39,40 @@
       owner: postgres
       group: postgres
       mode: 0644
-    when: inventory_hostname in groups['dbservers']
+    when: inventory_hostname in groups['dbserver']
 
   - name: Initialize PostgreSQL Database
     become_user: postgres
     command: psql -f /tmp/init.sql
-    when: inventory_hostname in groups['dbservers']
+    when: inventory_hostname in groups['dbserver']
 
   - name: Install Docker
     yum:
       name: docker
       state: present
-    when: inventory_hostname in groups['flaskservers']
+    when: inventory_hostname in groups['flask_servers']
 
   - name: Start Docker service
     service:
       name: docker
       state: started
       enabled: yes
-    when: inventory_hostname in groups['flaskservers']
+    when: inventory_hostname in groups['flask_servers']
 
   - name: Pull the latest Flask app image from Docker Hub
     command: "docker pull your-dockerhub-username/flask-app:latest"
-    when: inventory_hostname in groups['flaskservers']
+    when: inventory_hostname in groups['flask_servers']
 
   - name: Remove existing container (if running)
     command: "docker rm -f flask-container"
     ignore_errors: yes
-    when: inventory_hostname in groups['flaskservers']
+    when: inventory_hostname in groups['flask_servers']
 
   - name: Run Flask container
     command: >
       docker run -d --name flask-container -p 5000:5000
       -e DB_HOST={{ hostvars[groups['db'][0]]['ansible_host'] }}
       your-dockerhub-username/flask-app:latest
-    when: inventory_hostname in groups['flaskservers']
+    when: inventory_hostname in groups['flask_servers']
 ...
 
