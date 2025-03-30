@@ -1,0 +1,28 @@
+---
+- name: Install PostgreSQL
+  apt:
+    name: postgresql
+    state: present
+  when: "'dbserver' in group_names"
+
+- name: Start PostgreSQL service
+  service:
+    name: postgresql
+    state: started
+    enabled: yes
+  when: "'dbserver' in group_names"
+
+- name: Copy init.sql file to DB server
+  copy:
+    src: init.sql
+    dest: /tmp/init.sql
+    owner: postgres
+    group: postgres
+    mode: 0644
+  when: "'dbserver' in group_names"
+
+- name: Initialize PostgreSQL Database
+  become_user: postgres
+  command: psql -f /tmp/init.sql
+  when: "'dbserver' in group_names"
+
