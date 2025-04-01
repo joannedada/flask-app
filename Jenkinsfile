@@ -20,12 +20,9 @@ pipeline {
         stage('Terraform Apply') {
             steps {
                 script {
-                    // Run terraform apply using AWS credentials injected by Jenkins
-                    withCredentials([usernamePassword(credentialsId: 'aws-access-key-id', passwordVariable: 'AWS_ACCESS_KEY_ID', usernameVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-                        sh 'terraform apply -auto-approve'
+                    sh 'terraform apply -auto-approve'
                     }
                 }
             }
         }
     }
-}
