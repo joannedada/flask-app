@@ -15,12 +15,13 @@ pipeline {
         stage('Terraform Apply') {
             steps {
                 script {
-                    // Initialize Terraform
-                    sh 'terraform init'
-                    // Apply Terraform configuration
-                    sh 'terraform apply -auto-approve'
+                    dir('terraform') {
+                       sh 'terraform init'
+                       sh 'terraform apply -auto-approve'
+                    }
                 }
             }
         }
     }
+
 }
