@@ -1,5 +1,7 @@
 provider "aws" {
   region = "us-east-1"
+  access_key = credentials('aws-access-key-id')  # Reference to the Jenkins stored AWS Access Key ID
+  secret_key = credentials('aws-secret-access-key')  # Reference to the Jenkins stored AWS Secret Access Key
 }
 
 # Jenkins Agent EC2 Instance
@@ -69,5 +71,9 @@ resource "aws_instance" "db_server" {
 # S3 Bucket for Jenkins Artifacts
 resource "aws_s3_bucket" "jenkins_artifacts" {
   bucket = "my-jenkins-artifacts-bucket"
+}
+
+resource "aws_s3_bucket_acl" "jenkins_artifacts_acl" {
+  bucket = aws_s3_bucket.jenkins_artifacts.id
   acl    = "private"
 }
