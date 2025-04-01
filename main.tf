@@ -64,10 +64,10 @@ resource "aws_instance" "db_server" {
   tags = {
     Name = "DB-Server"
   }
-  
+}
+
+# S3 Bucket for Jenkins Artifacts
 resource "aws_s3_bucket" "jenkins_artifacts" {
   bucket = "my-jenkins-artifacts-bucket"
   acl    = "private"
-}
-
 }
