@@ -1,7 +1,7 @@
 provider "aws" {
   region = "us-east-1"
-  access_key = credentials('aws-access-key-id')  # Reference to the Jenkins stored AWS Access Key ID
-  secret_key = credentials('aws-secret-access-key')  # Reference to the Jenkins stored AWS Secret Access Key
+  access_key = credentials("aws-access-key-id")  # Reference to the Jenkins stored AWS Access Key ID
+  secret_key = credentials("aws-secret-access-key")  # Reference to the Jenkins stored AWS Secret Access Key
 }
 
 # Jenkins Agent EC2 Instance
