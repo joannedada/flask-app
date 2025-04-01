@@ -67,11 +67,11 @@ resource "aws_instance" "db_server" {
 }
 
 # S3 Bucket for Jenkins Artifacts
-resource "aws_s3_bucket" "jenkins_artifacts" {
-  bucket = "my-jenkins-artifacts-bucket"
+resource "aws_s3_bucket" "joanne_artifacts" {
+  bucket = "joanne-artifacts-bucket"
 }
 
-resource "aws_s3_bucket_acl" "jenkins_artifacts_acl" {
-  bucket = aws_s3_bucket.jenkins_artifacts.id
+resource "aws_s3_bucket_acl" "joanne_artifacts_acl" {
+  bucket = aws_s3_joanne_artifacts.id
   acl    = "private"
 }
