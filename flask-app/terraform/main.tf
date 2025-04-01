@@ -54,9 +54,9 @@ resource "aws_elb" "flask_lb" {
   }
 }
 
-# Database Server (Ubuntu)]
+# Database Server (Ubuntu)
 resource "aws_instance" "db_server" {
-  ami           = "ami-0f9de6e2d2f067fca"  # Ubuntu 23.04
+  ami           = "ami-0f9de6e2d2f067fca"  # Ubuntu 22.04
   instance_type = "t2.micro"
   key_name      = "jonewkeypair"
   security_groups = ["launch-wizard-1"]
@@ -64,4 +64,6 @@ resource "aws_instance" "db_server" {
   tags = {
     Name = "DB-Server"
   }
+
+
 }
