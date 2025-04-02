@@ -42,7 +42,20 @@
     virtualenv_python: python3
   become: yes
 
-- name: Start Flask app
-  shell: |
-    nohup /var/www/flask_app/venv/bin/python /var/www/flask_app/app.py > /var/www/flask_app/app.log 2>&1 &
+- name: Copy Flask systemd service file
+  template:
+    src: flask_app.service.j2
+    dest: /etc/systemd/system/flask_app.service
+  become: yes
+
+- name: Reload systemd daemon
+  systemd:
+    daemon_reload: yes
+  become: yes
+
+- name: Ensure Flask app is running
+  systemd:
+    name: flask_app
+    state: restarted
+    enabled: yes
   become: yes
