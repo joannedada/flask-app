@@ -1,5 +1,5 @@
 ---
-- hosts: localhost
+- hosts: flask_servers
   become: yes
   tasks:
     - name: Fix for Fedora's split paths - create symlinks
