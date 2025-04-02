@@ -1,13 +1,17 @@
 ---
-- name: Setup Flask App Servers
+- name: Deploy Flask Application
   hosts: flask_servers
+  become: yes
+  gather_facts: no  # Temporarily disabled
+  
+  # Global variables (overridable by hosts.ini)
   vars:
-    ansible_python_interpreter: /usr/bin/python3.13
-  gather_facts: no
+    ansible_python_interpreter: /usr/bin/python3
+    
   roles:
-    - python_flask
-    - deploy_app
-    - configure_app
+    - role: python_flask  # Handles Python/Ansible deps + Flask setup
+    - role: deploy_app    # Handles application deployment
+    - role: configure_app
 
 - name: Setup Database Server
   hosts: db_server
