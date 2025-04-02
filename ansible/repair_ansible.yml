@@ -1,0 +1,22 @@
+---
+- name: Repair Ansible environment on targets
+  hosts: all
+  gather_facts: no
+  become: yes
+
+  tasks:
+    - name: Reinstall ansible-core with correct paths
+      raw: |
+        sudo python3 -m pip uninstall -y ansible-core
+        sudo python3 -m pip install --prefix=/usr/local --ignore-installed ansible-core==2.11.12
+        sudo find /usr/local/lib/python3.13/site-packages -type d -exec chmod 755 {} \;
+        sudo find /usr/local/lib/python3.13/site-packages -type f -exec chmod 644 {} \;
+
+    - name: Verify Ansible can import module_utils
+      raw: |
+        python3 -c "from ansible.module_utils import six; print('Import successful')"
+      register: verify
+      changed_when: false
+
+    - debug:
+        var: verify.stdout
