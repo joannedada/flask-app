@@ -1,5 +1,0 @@
----
-- name: Install Python
-  package:
-    name: python3
-    state: present

@@ -1,9 +1,0 @@
----
-- name: Deploy PostgreSQL and Flask App
-  hosts: all
-  become: yes
-  roles:
-    - common
-    - postgresql
-    - flask_app
-

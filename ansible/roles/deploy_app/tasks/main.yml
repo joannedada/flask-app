@@ -1,0 +1,48 @@
+---
+- name: Create Flask app directory
+  file:
+    path: /var/www/flask_app/templates
+    state: directory
+    owner: ubuntu
+    group: ubuntu
+    mode: '0755'
+  become: yes
+
+- name: Copy Flask app files
+  copy:
+    src: files/app.py
+    dest: /var/www/flask_app/app.py
+    owner: ubuntu
+    group: ubuntu
+    mode: '0755'
+  become: yes
+
+- name: Copy config.py
+  copy:
+    src: files/config.py
+    dest: /var/www/flask_app/config.py
+    owner: ubuntu
+    group: ubuntu
+    mode: '0755'
+  become: yes
+
+- name: Copy index.html to templates folder
+  copy:
+    src: files/templates/index.html
+    dest: /var/www/flask_app/templates/index.html
+    owner: ubuntu
+    group: ubuntu
+    mode: '0755'
+  become: yes
+
+- name: Install dependencies
+  pip:
+    requirements: /var/www/flask_app/requirements.txt
+    virtualenv: /var/www/flask_app/venv
+    virtualenv_python: python3
+  become: yes
+
+- name: Start Flask app
+  shell: |
+    nohup /var/www/flask_app/venv/bin/python /var/www/flask_app/app.py > /var/www/flask_app/app.log 2>&1 &
+  become: yes

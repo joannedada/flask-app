@@ -1,0 +1,31 @@
+---
+- name: Install PostgreSQL and dependencies
+  apt:
+    name:
+      - postgresql
+      - postgresql-contrib
+      - libpq-dev
+      - python3-psycopg2
+    state: present
+  become: yes
+
+- name: Start PostgreSQL service
+  systemd:
+    name: postgresql
+    state: started
+    enabled: yes
+  become: yes
+
+- name: Copy init.sql to the server
+  copy:
+    src: files/init.sql
+    dest: /tmp/init.sql
+    owner: postgres
+    group: postgres
+    mode: '0644'
+  become: yes
+
+- name: Run init.sql script
+  become: yes
+  become_user: postgres
+  command: psql -f /tmp/init.sql

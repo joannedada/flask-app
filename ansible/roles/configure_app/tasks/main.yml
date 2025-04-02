@@ -1,0 +1,15 @@
+---
+- name: Set environment variables for PostgreSQL
+  lineinfile:
+    path: /etc/environment
+    line: "{{ item }}"
+  with_items:
+    - "DB_HOST={{ hostvars['db-server']['ansible_host'] }}"
+    - "DB_NAME=devopsdb"
+    - "DB_USER=devops"
+    - "DB_PASS=password"
+  become: yes
+
+- name: Reload environment variables
+  shell: source /etc/environment
+  become: yes

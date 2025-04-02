@@ -1,0 +1,14 @@
+---
+- name: Setup Flask App Servers
+  hosts: flask_servers
+  roles:
+    - python_flask
+    - deploy_app
+    - configure_app
+
+- name: Setup Database Server
+  hosts: db_server
+  roles:
+    - postgresql
+
+
