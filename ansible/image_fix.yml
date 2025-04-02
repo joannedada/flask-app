@@ -1,25 +1,25 @@
 ---
-- name: Fedora/Cloud Image Python Fix
-  hosts: all
+- hosts: localhost
   become: yes
-  gather_facts: no
-
   tasks:
-    - name: Reconfigure Python package structure
-      raw: |
-        # Fix for Fedora's split paths
-        sudo ln -sf /usr/local/lib/python3.13/site-packages /usr/lib/python3.13/site-packages
-        sudo ln -sf /usr/local/lib64/python3.13/site-packages /usr/lib64/python3.13/site-packages
-        
-        # Refresh Python cache
-        sudo python3 -c "import importlib; importlib.invalidate_caches()"
-        
-        # Verify fix
-        python3 -c "import sys; print('\n'.join(sys.path)); \
-                   from ansible.module_utils.six.moves import urllib; \
-                   print('IMPORT_SUCCESS')"
-      register: fix_result
-      ignore_errors: yes
+    - name: Fix for Fedora's split paths - create symlinks
+      file:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        state: link
+        force: yes
+      loop:
+        - { src: '/usr/local/lib/python3.13/site-packages', dest: '/usr/lib/python3.13/site-packages' }
+        - { src: '/usr/local/lib64/python3.13/site-packages', dest: '/usr/lib64/python3.13/site-packages' }
 
-    - debug:
-        var: fix_result.stdout_lines
+    - name: Refresh Python cache
+      command: python3 -c "import importlib; importlib.invalidate_caches()"
+
+    - name: Verify fix
+      command: python3 -c "import sys; print('\n'.join(sys.path)); from ansible.module_utils.six.moves import urllib; print('IMPORT_SUCCESS')"
+      register: verify_result
+      changed_when: False
+
+    - name: Display verification result
+      debug:
+        var: verify_result.stdout_lines
