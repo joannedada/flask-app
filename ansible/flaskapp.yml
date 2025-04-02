@@ -1,6 +1,7 @@
 ---
 - name: Setup Flask App Servers
   hosts: flask_servers
+  gather_facts: no
   roles:
     - python_flask
     - deploy_app
