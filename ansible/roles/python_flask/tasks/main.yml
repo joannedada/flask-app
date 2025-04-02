@@ -13,6 +13,13 @@
     state: present
   become: yes
 
+- name: Install required Python packages
+  pip:
+        name:
+          - six
+          - ansible
+        state: present
+
 - name: Install Flask
   pip:
     name: flask
