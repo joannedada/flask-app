@@ -1,6 +1,8 @@
 ---
 - name: Setup Flask App Servers
   hosts: flask_servers
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
   gather_facts: no
   roles:
     - python_flask
