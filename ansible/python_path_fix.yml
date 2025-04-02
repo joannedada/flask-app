@@ -5,13 +5,18 @@
   gather_facts: no
 
   tasks:
-    - name: Create .pth file for Python path
-      copy:
-        dest: /usr/local/lib/python3.13/site-packages/ansible.pth
-        content: |
-          /usr/local/lib/python3.13/site-packages
-          /usr/local/lib64/python3.13/site-packages
-        mode: 0644
+    - name: Ensure site-packages directory exists
+      raw: |
+        mkdir -p /usr/local/lib/python3.13/site-packages
+        chmod 755 /usr/local/lib/python3.13/site-packages
+
+    - name: Create .pth file using raw module
+      raw: |
+        cat > /usr/local/lib/python3.13/site-packages/ansible.pth <<EOF
+        /usr/local/lib/python3.13/site-packages
+        /usr/local/lib64/python3.13/site-packages
+        EOF
+        chmod 644 /usr/local/lib/python3.13/site-packages/ansible.pth
 
     - name: Verify Python paths
       raw: |
