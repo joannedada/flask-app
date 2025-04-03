@@ -10,7 +10,7 @@
   pip:
     name:
       - six>=1.16.0
-      - ansible-core>=2.16
+      - ansible-core>=2.15
     executable: pip3
 
 # Phase 3: Now safe to gather facts

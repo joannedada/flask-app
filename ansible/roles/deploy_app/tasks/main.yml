@@ -1,51 +1,59 @@
 ---
-- name: Create Flask app directory
+- name: Create Flask app directory structure
   file:
-    path: /var/www/flask_app/templates
+    path: "{{ item }}"
     state: directory
     owner: fedora
     group: fedora
     mode: '0755'
   become: yes
+  loop:
+    - /var/www/flask_app
+    - /var/www/flask_app/templates
+    - /var/www/flask_app/venv  # Directory for virtual environment
 
-- name: Copy Flask app files
+- name: Copy application files
   copy:
-    src: files/app.py
-    dest: /var/www/flask_app/app.py
+    src: "files/{{ item.src }}"
+    dest: "/var/www/flask_app/{{ item.dest }}"
     owner: fedora
     group: fedora
     mode: '0755'
   become: yes
+  loop:
+    - { src: 'app.py', dest: 'app.py' }
+    - { src: 'config.py', dest: 'config.py' }
+    - { src: 'templates/index.html', dest: 'templates/index.html' }
+    - { src: 'requirements.txt', dest: 'requirements.txt' }  # Ensure this exists
 
-- name: Copy config.py
-  copy:
-    src: files/config.py
-    dest: /var/www/flask_app/config.py
-    owner: fedora
-    group: fedora
-    mode: '0755'
+- name: Install Python3 and virtualenv packages
+  dnf:
+    name:
+      - python3
+      - python3-virtualenv
+    state: present
   become: yes
 
-- name: Copy index.html to templates folder
-  copy:
-    src: files/templates/index.html
-    dest: /var/www/flask_app/templates/index.html
-    owner: fedora
-    group: fedora
-    mode: '0755'
+- name: Create Python virtual environment
+  command: "python3 -m venv /var/www/flask_app/venv"
+  args:
+    creates: "/var/www/flask_app/venv/bin/activate"  # Makes it idempotent
   become: yes
+  become_user: fedora  # Important to create venv as the app user
 
-- name: Install dependencies
+- name: Install Python dependencies in virtualenv
   pip:
     requirements: /var/www/flask_app/requirements.txt
     virtualenv: /var/www/flask_app/venv
-    virtualenv_python: python3
+    virtualenv_command: python3 -m venv  # More reliable than virtualenv binary
   become: yes
+  become_user: fedora  # Install packages as the app user
 
-- name: Copy Flask systemd service file
+- name: Deploy systemd service file
   template:
     src: flask_app.service.j2
     dest: /etc/systemd/system/flask_app.service
+    mode: '0644'
   become: yes
 
 - name: Reload systemd daemon
@@ -53,7 +61,7 @@
     daemon_reload: yes
   become: yes
 
-- name: Ensure Flask app is running
+- name: Ensure Flask app service is running
   systemd:
     name: flask_app
     state: restarted
