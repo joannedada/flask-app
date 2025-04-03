@@ -1,7 +1,7 @@
 ---
 # Phase 1: Critical System Setup
 - name: Install Python and build tools (Fedora)
-  ansible.builtin.dnf:
+  ansible.builtin.dnf5:
     name:
       - python3
       - python3-pip
