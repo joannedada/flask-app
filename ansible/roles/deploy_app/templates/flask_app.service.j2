@@ -3,7 +3,8 @@ Description=Flask App
 After=network.target
 
 [Service]
-User=ubuntu
+User=ec2-user
+Group=ec2-user
 WorkingDirectory=/var/www/flask_app
 ExecStart=/var/www/flask_app/venv/bin/python /var/www/flask_app/app.py
 Restart=always
