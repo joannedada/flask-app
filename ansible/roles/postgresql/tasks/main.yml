@@ -28,4 +28,4 @@
 - name: Run init.sql script
   become: yes
   become_user: postgres
-  command: psql -f /tmp/init.sql
+  command: psql -U postgres -f /tmp/init.sql
