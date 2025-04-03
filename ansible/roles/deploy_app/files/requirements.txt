@@ -1,0 +1,11 @@
+- name: Basic requirements.txt
+  copy:
+    content: |
+      flask
+      gunicorn
+      psycopg2-binary
+    dest: /var/www/flask_app/requirements.txt
+    owner: fedora
+    group: fedora
+    mode: '0644'
+  become: yes
