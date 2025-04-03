@@ -1,16 +1,10 @@
 ---
 # Phase 1: Critical System Setup
 - name: Install Python and build tools (Fedora)
-  ansible.builtin.dnf5:
-    name:
-      - python3
-      - python3-pip
-      - python3-devel
-      - gcc
-      - openssl-devel
-    state: present
+  ansible.builtin.command: |
+    dnf5 install -y python3 python3-pip python3-devel gcc openssl-devel
   tags: always
-  use_backend: dnf5
+
 # Phase 2: Fix Ansible environment
 - name: Install ansible-core and six
   pip:
