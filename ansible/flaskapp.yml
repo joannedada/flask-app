@@ -14,7 +14,7 @@
     - role: configure_app
 
 - name: Setup Database Server
-  hosts: dbserver
+  hosts: db-server
   roles:
     - postgresql
 
