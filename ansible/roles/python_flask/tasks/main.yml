@@ -1,7 +1,7 @@
 ---
 # Phase 1: Critical System Setup
 - name: Install Python and build tools (Fedora)
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name:
       - python3
       - python3-pip
@@ -10,7 +10,8 @@
       - openssl-devel
     state: present
   tags: always
-
+  vars:
+    ansible_pkg_mgr: dnf
 # Phase 2: Fix Ansible environment
 - name: Install ansible-core and six
   pip:
