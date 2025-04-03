@@ -3,8 +3,8 @@
   file:
     path: /var/www/flask_app/templates
     state: directory
-    owner: ubuntu
-    group: ubuntu
+    owner: fedora
+    group: fedora
     mode: '0755'
   become: yes
 
@@ -12,8 +12,8 @@
   copy:
     src: files/app.py
     dest: /var/www/flask_app/app.py
-    owner: ubuntu
-    group: ubuntu
+    owner: fedora
+    group: fedora
     mode: '0755'
   become: yes
 
@@ -21,8 +21,8 @@
   copy:
     src: files/config.py
     dest: /var/www/flask_app/config.py
-    owner: ubuntu
-    group: ubuntu
+    owner: fedora
+    group: fedora
     mode: '0755'
   become: yes
 
@@ -30,8 +30,8 @@
   copy:
     src: files/templates/index.html
     dest: /var/www/flask_app/templates/index.html
-    owner: ubuntu
-    group: ubuntu
+    owner: fedora
+    group: fedora
     mode: '0755'
   become: yes
 
