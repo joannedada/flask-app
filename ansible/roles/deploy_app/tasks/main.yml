@@ -3,8 +3,8 @@
   file:
     path: "{{ item }}"
     state: directory
-    owner: fedora
-    group: fedora
+    owner: ec2-user
+    group: ec2-user
     mode: '0755'
   become: yes
   loop:
@@ -16,8 +16,8 @@
   copy:
     src: "files/{{ item.src }}"
     dest: "/var/www/flask_app/{{ item.dest }}"
-    owner: fedora
-    group: fedora
+    owner: ec2-user
+    group: ec2-user
     mode: '0755'
   become: yes
   loop:
@@ -39,7 +39,7 @@
   args:
     creates: "/var/www/flask_app/venv/bin/activate"  # Makes it idempotent
   become: yes
-  become_user: fedora  # Important to create venv as the app user
+  become_user: ec2-user  # Important to create venv as the app user
 
 - name: Install Python dependencies in virtualenv
   pip:
@@ -47,7 +47,7 @@
     virtualenv: /var/www/flask_app/venv
     virtualenv_command: python3 -m venv  # More reliable than virtualenv binary
   become: yes
-  become_user: fedora  # Install packages as the app user
+  become_user: ec2-user  # Install packages as the app user
 
 - name: Deploy systemd service file
   template:
