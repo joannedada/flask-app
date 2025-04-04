@@ -7,3 +7,4 @@ CREATE TABLE users (
 );
 
 INSERT INTO users (name) VALUES ('Alice'), ('Bob'), ('Charlie');
+ON CONFLICT (name) DO NOTHING;
