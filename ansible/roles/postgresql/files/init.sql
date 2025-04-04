@@ -1,7 +1,7 @@
 CREATE DATABASE devopsdb;
 \c devopsdb;
 
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50)
 );
