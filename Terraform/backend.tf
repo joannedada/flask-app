@@ -1,9 +1,10 @@
-terraform {
-  backend "remote" {
-    organization = "devopsensei"  # Your Terraform Cloud org name
+terraform { 
+  cloud { 
+    
+    organization = "devopsensei" 
 
-    workspaces {
-      name = "devopsensei"  # The workspace name you just created
-    }
-  }
+    workspaces { 
+      name = "devopsensei" 
+    } 
+  } 
 }
