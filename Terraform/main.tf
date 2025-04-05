@@ -7,8 +7,14 @@ terraform {
   }
 }
 
-provider "aws" {
- region = "us-east-1"
+ provider "aws" {
+  region = "us-east-1"
+  
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 2
+  }
 }
 
 # Jenkins Agent EC2 Instance
