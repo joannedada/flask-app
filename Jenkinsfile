@@ -19,9 +19,10 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Checkout code from GitHub repository
-                git 'https://github.com/joannedada/flask-app.git'
+                git branch: 'dev', url: 'https://github.com/joannedada/flask-app.git'
             }
         }
+
         stage('Build App') {
             steps {
                 script {
