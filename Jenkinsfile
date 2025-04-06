@@ -32,8 +32,7 @@ pipeline {
                      sh '''
                     python3 -m venv ./build_venv
                     . ./build_venv/bin/activate
-                    pip install --upgrade pip
-                    pip install -r requirements.txt
+                    pip install -r ansible/roles/deploy_app/requirements.txt
                     '''
                 }
             }
@@ -43,7 +42,10 @@ pipeline {
             steps {
                 script {
                     // Run Flake8 to check the entire codebase for style issues
-                    sh 'source ${VIRTUAL_ENV}/bin/activate && flake8 .'
+                    sh '''
+                    . ./build_venv/bin/activate
+                        flake8 app/ --count --show-source --statistics
+                    '''    
                 }
             }
         }
@@ -52,7 +54,10 @@ pipeline {
             steps {
                 script {
                     // Run Bandit over the entire codebase to check for security vulnerabilities
-                    sh 'source ${VIRTUAL_ENV}/bin/activate && bandit -r .'
+                    sh '''
+                    . ./build_venv/bin/activate
+                    bandit -r app/
+                    '''
                 }
             }
         }
@@ -61,7 +66,10 @@ pipeline {
             steps {
                 script {
                     // Run pytest for the entire project to execute tests
-                    sh 'source ${VIRTUAL_ENV}/bin/activate && pytest'
+                    sh '''
+                    . ./build_venv/bin/activate
+                    pytest tests/ -v
+                    '''
                 }
             }
         }            
