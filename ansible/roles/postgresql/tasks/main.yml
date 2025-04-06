@@ -16,6 +16,16 @@
     enabled: yes
   become: yes
 
+- name: Ensure database exists
+  become: yes
+  become_user: postgres
+  command: createdb devopsdb
+  args:
+    creates: "/var/lib/postgresql/{{ postgres_version }}/main/base/{{ devopsdb_oid }}"
+  register: db_created
+  changed_when: db_created.rc == 0
+  tags: database
+
 - name: Copy init.sql to the server
   copy:
     src: files/init.sql
@@ -29,3 +39,6 @@
   become: yes
   become_user: postgres
   command: psql -U postgres -f /tmp/init.sql
+  register: db_init
+  changed_when: "'already exists' not in db_init.stderr"
+  tags: database
