@@ -51,6 +51,7 @@ pipeline {
                 }
             }
         }
+    }
 
         stage('Linting (Flake8)') {
             steps {
