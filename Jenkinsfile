@@ -24,8 +24,7 @@ pipeline {
                 git branch: 'dev', url: 'https://github.com/joannedada/flask-app.git'
             }
         }
-    }
-   
+
         stage('Build App') {
             steps {
                 script {
@@ -84,7 +83,7 @@ pipeline {
                             bucket: "${S3_BUCKET}",
                             file: "flask_app.tar.gz",
                             path: "${APP_PATH}"
-                        )
+                         )
                 }
             }
         }
@@ -109,4 +108,5 @@ pipeline {
                     )
                 } 
             }
-        }  
+        }
+    }
