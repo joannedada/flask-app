@@ -1,5 +1,6 @@
 pipeline {
-    agent any
+
+    agent { label 'jenkins-agent' }
 
     environment {
         VIRTUAL_ENV = '/var/www/flask_app/venv'
@@ -94,4 +95,5 @@ pipeline {
             }
         }  
     }
+}
 }
