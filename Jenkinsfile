@@ -3,11 +3,9 @@ pipeline {
     agent { label 'jenkins-agent' }
 
     environment {
-        VIRTUAL_ENV = '/var/www/flask_app/venv'
-        PYTHONPATH = "${WORKSPACE}/${VIRTUAL_ENV}/bin"
-        S3_BUCKET = 'joanne-artifacts-bucket' // Replace with your S3 bucket name
-        APP_VERSION = "${params.APP_VERSION}"  // Accepting version from the user as a parameter
-        APP_PATH = "flask-app/${APP_VERSION}/flask_app.tar.gz"  // Path where the app will be stored in S3
+        S3_BUCKET = 'joanne-artifacts-bucket'
+        APP_PATH = "flask-app/${params.APP_VERSION}/flask_app.tar.gz"
+        DEPLOY_PATH = "/var/www/flask_app"
     }
 
     parameters {
@@ -26,38 +24,22 @@ pipeline {
                 git branch: 'dev', url: 'https://github.com/joannedada/flask-app.git'
             }
         }
-
+    }
+   
         stage('Build App') {
             steps {
                 script {
-                    // No need to create the virtual environment here, since it already exists
-                    echo "Using existing virtual environment at ${VIRTUAL_ENV}"
-
                     // Activate the virtual environment and install dependencies
-                    sh "source ${VIRTUAL_ENV}/bin/activate && pip install -r requirements.txt"
-
-                    // Perform the build step, for example, preparing a deployable artifact
-                    echo "Building Flask app..."
-                    sh 'tar -czf flask_app.tar.gz .'
-
-                    // Optionally, you could run tests here or other build-related tasks
-                    sh 'source ${VIRTUAL_ENV}/bin/activate && pytest'
+                     sh '''
+                    python -m venv ./build_venv
+                    . ./build_venv/bin/activate
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
+                    '''
                 }
             }
         }
-
-        stage('Upload to S3') {
-            steps {
-                script {
-                    // Upload the app to S3 under the versioned path
-                    echo "Uploading app version ${params.APP_VERSION} to S3..."
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
-                    sh "aws s3 cp flask_app.tar.gz s3://${S3_BUCKET}/flask-app/${APP_VERSION}/flask_app.tar.gz"
-                }
-            }
-        }
-    }
-
+       
         stage('Linting (Flake8)') {
             steps {
                 script {
@@ -83,10 +65,38 @@ pipeline {
                     sh 'source ${VIRTUAL_ENV}/bin/activate && pytest'
                 }
             }
-        }
-        stage('Deploy') {
+        }            
+
+        stage('Package & Upload') {
             steps {
                 script {
+                      // Create clean production artifact
+                    sh '''
+                    mkdir -p package
+                    cp -r app package/
+                    cp requirements.txt package/
+                    cd package && tar -czf ../flask_app.tar.gz .
+                    '''
+                    
+                    // Upload to S3
+                    withAWS(credentials: 'aws-credentials', region: 'us-east-1') {
+                        s3Upload(
+                            bucket: "${S3_BUCKET}",
+                            file: "flask_app.tar.gz",
+                            path: "${APP_PATH}"
+                        )
+                }
+            }
+        }
+    }
+
+        stage('Download & Deploy') {
+            steps {
+                script {
+                    sh """
+                        aws s3 cp s3://${S3_BUCKET}/${APP_PATH} ./downloaded_app.tar.gz
+                        """
+                    }
                     // Deploy the app using Ansible (now that the app is uploaded to S3)
                     echo "Deploying App version: ${params.APP_VERSION} to Flask server"
                     ansiblePlaybook(
@@ -100,5 +110,3 @@ pipeline {
                 } 
             }
         }  
-    }
-}
