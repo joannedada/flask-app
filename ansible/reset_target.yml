@@ -1,0 +1,15 @@
+# reset_targets.yml
+---
+- name: Reset target Python environment
+  hosts: flask_servers
+  gather_facts: no
+  become: yes
+
+  tasks:
+    - name: Clean and reinstall Python
+      raw: |
+        sudo dnf remove -y python3-ansible ansible-core
+        sudo rm -rf /usr/local/lib/python3*
+        sudo dnf install -y python3 python3-pip
+        sudo python3 -m pip install --ignore-installed six==1.16.0 ansible-core==2.11.12
+        sudo chmod -R a+rX /usr/local/lib/python3.*

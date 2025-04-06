@@ -1,0 +1,25 @@
+---
+- hosts: flask_servers
+  become: yes
+  tasks:
+    - name: Fix for Fedora's split paths - create symlinks
+      file:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        state: link
+        force: yes
+      loop:
+        - { src: '/usr/local/lib/python3.13/site-packages', dest: '/usr/lib/python3.13/site-packages' }
+        - { src: '/usr/local/lib64/python3.13/site-packages', dest: '/usr/lib64/python3.13/site-packages' }
+
+    - name: Refresh Python cache
+      command: python3 -c "import importlib; importlib.invalidate_caches()"
+
+    - name: Verify fix
+      command: python3 -c "import sys; print('\n'.join(sys.path)); from ansible.module_utils.six.moves import urllib; print('IMPORT_SUCCESS')"
+      register: verify_result
+      changed_when: False
+
+    - name: Display verification result
+      debug:
+        var: verify_result.stdout_lines

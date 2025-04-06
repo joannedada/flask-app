@@ -1,0 +1,39 @@
+---
+- name: Clean Python environment and reinstall
+  hosts: all
+  become: yes
+  gather_facts: no
+
+  tasks:
+    - name: Remove all conflicting installations
+      raw: |
+        sudo dnf remove -y python3-ansible ansible-core || true
+        sudo pip3 uninstall -y ansible-core six || true
+        sudo rm -rf /usr/local/lib/python3.13/site-packages/{ansible*,six*}
+        sudo rm -rf /usr/lib/python3.13/site-packages/{ansible*,six*}
+
+    - name: Install system Python packages
+      raw: |
+        sudo dnf install -y python3 python3-pip python3-devel
+
+    - name: Install six in correct location
+      raw: |
+        sudo python3 -m pip install --prefix=/usr/local --ignore-installed six==1.16.0
+
+    - name: Install ansible-core with dependencies
+      raw: |
+        sudo python3 -m pip install --prefix=/usr/local --ignore-installed ansible-core==2.11.12
+
+    - name: Create symlinks for Python 3.13 compatibility
+      raw: |
+        sudo ln -sf /usr/local/lib/python3.13/site-packages /usr/local/lib64/python3.13/site-packages
+        sudo ln -sf /usr/local/lib64/python3.13/site-packages /usr/local/lib/python3.13/site-packages
+
+    - name: Verify installation
+      raw: |
+        python3 -c "from ansible.module_utils.six.moves import urllib; print('SUCCESS')"
+      register: verify
+      ignore_errors: yes
+
+    - debug:
+        var: verify.stdout

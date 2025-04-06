@@ -28,4 +28,7 @@
 - name: Run init.sql script
   become: yes
   become_user: postgres
-  command: psql -f /tmp/init.sql
+  command: psql -U postgres -f /tmp/init.sql
+  register: db_init
+  changed_when: "'already exists' not in db_init.stderr"
+  tags: database

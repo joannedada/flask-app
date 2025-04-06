@@ -1,0 +1,20 @@
+---
+- name: Fix Ansible module utilities on targets
+  hosts: all
+  gather_facts: no
+  become: yes
+
+  tasks:
+    - name: Install ansible-core temporarily
+      raw: |
+        sudo python3 -m pip install --prefix=/usr/local --ignore-installed ansible-core==2.11.12
+        sudo rm -rf ~/.ansible  # Clear any cached broken modules
+
+    - name: Verify repair
+      raw: |
+        python3 -c "from ansible.module_utils.six.moves import urllib; print('Success')"
+      register: verify
+      changed_when: false
+
+    - debug:
+        var: verify.stdout

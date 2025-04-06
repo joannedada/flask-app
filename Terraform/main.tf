@@ -1,4 +1,13 @@
-provider "aws" {
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      version = "5.94.1"
+    }
+  }
+}
+
+ provider "aws" {
   region = "us-east-1"
 }
 
@@ -17,7 +26,7 @@ resource "aws_instance" "jenkins_agent" {
 # Flask App Servers (2 Instances)
 resource "aws_instance" "flask_app_servers" {
   count         = 2
-  ami           = "ami-0312e9eae71acad3a"  # CentOS AMI
+  ami           = "ami-00a929b66ed6e0de6"  # CentOS AMI
   instance_type = "t2.micro"
   key_name      = "jonewkeypair"
   security_groups = ["launch-wizard-1"]
@@ -62,16 +71,11 @@ resource "aws_instance" "db_server" {
   security_groups = ["launch-wizard-1"]
 
   tags = {
-    Name = "DB-Server"
+    Name = "db-server"
   }
 }
 
 # S3 Bucket for Jenkins Artifacts
 resource "aws_s3_bucket" "joanne_artifacts" {
   bucket = "joanne-artifacts-bucket"
-}
-
-resource "aws_s3_bucket_acl" "joanne_artifacts_acl" {
-  bucket = aws_s3_joanne_artifacts.id
-  acl    = "private"
 }

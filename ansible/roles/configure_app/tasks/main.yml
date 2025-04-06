@@ -6,8 +6,8 @@
   with_items:
     - "DB_HOST={{ hostvars['db-server']['ansible_host'] }}"
     - "DB_NAME=devopsdb"
-    - "DB_USER=devops"
-    - "DB_PASS=password"
+    - "DB_USER=postgres"
+    - "DB_PASS=postgres"
   become: yes
 
 - name: Reload environment variables
