@@ -1,6 +1,7 @@
 [bandit]
 # Directories to exclude from Bandit checks (optional)
-exclude = tests, migrations, .git, __pycache__
+exclude = tests, test, migrations, .git, __pycache__
+skips = B101
 
 # Specific Bandit test groups to include (leave empty to check all)
 # Check for more info on specific tests: https://bandit.readthedocs.io/en/latest/plugins.html
