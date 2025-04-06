@@ -45,6 +45,7 @@ pipeline {
                 script {
                     // Upload the app to S3 under the versioned path
                     echo "Uploading app version ${params.APP_VERSION} to S3..."
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
                     sh "aws s3 cp flask_app.tar.gz s3://${S3_BUCKET}/flask-app/${APP_VERSION}/flask_app.tar.gz"
                 }
             }
