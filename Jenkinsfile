@@ -33,6 +33,7 @@ pipeline {
                     python3 -m venv ./build_venv
                     . ./build_venv/bin/activate
                     pip install -r ansible/roles/deploy_app/files/requirements.txt
+                    pip install flake8 bandit pytest
                     '''
                 }
             }
