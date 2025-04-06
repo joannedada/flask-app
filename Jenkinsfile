@@ -25,14 +25,15 @@ pipeline {
             }
         }
 
-        stage('Build App') {
+        stage('Setup Environment') {
             steps {
                 script {
                     // Activate the virtual environment and install dependencies
                      sh '''
                     python3 -m venv ./build_venv
                     . ./build_venv/bin/activate
-                    pip install -r ansible/roles/deploy_app/requirements.txt
+                    pip install -r ansible/roles/deploy_app/files/requirements.txt
+                    pip install flake8 bandit pytest
                     '''
                 }
             }
