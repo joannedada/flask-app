@@ -23,23 +23,23 @@ pipeline {
             }
         }
         stage('Build App') {
-                    steps {
-                        script {
-                            // No need to create the virtual environment here, since it already exists
-                            echo "Using existing virtual environment at ${VIRTUAL_ENV}"
+            steps {
+                script {
+                    // No need to create the virtual environment here, since it already exists
+                    echo "Using existing virtual environment at ${VIRTUAL_ENV}"
 
-                            // Activate the virtual environment and install dependencies
-                            sh "source ${VIRTUAL_ENV}/bin/activate && pip install -r requirements.txt"
+                    // Activate the virtual environment and install dependencies
+                    sh "source ${VIRTUAL_ENV}/bin/activate && pip install -r requirements.txt"
 
-                            // Perform the build step, for example, preparing a deployable artifact
-                            echo "Building Flask app..."
-                            sh 'tar -czf flask_app.tar.gz .'
+                    // Perform the build step, for example, preparing a deployable artifact
+                    echo "Building Flask app..."
+                    sh 'tar -czf flask_app.tar.gz .'
 
-                            // Optionally, you could run tests here or other build-related tasks
-                            sh 'source ${VIRTUAL_ENV}/bin/activate && pytest'
-                        }
-                    }
+                    // Optionally, you could run tests here or other build-related tasks
+                    sh 'source ${VIRTUAL_ENV}/bin/activate && pytest'
                 }
+            }
+        }
 
         stage('Upload to S3') {
             steps {
