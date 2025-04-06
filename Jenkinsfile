@@ -14,6 +14,10 @@ pipeline {
         string(name: 'APP_VERSION', defaultValue: 'v1.0.0', description: 'App version to deploy')
     }
 
+    tools {
+        git 'Default'
+    }
+    
     stages {
 
         stage('Checkout') {
