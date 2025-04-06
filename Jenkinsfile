@@ -30,7 +30,7 @@ pipeline {
                 script {
                     // Activate the virtual environment and install dependencies
                      sh '''
-                    python -m venv ./build_venv
+                    python3 -m venv ./build_venv
                     . ./build_venv/bin/activate
                     pip install --upgrade pip
                     pip install -r requirements.txt
