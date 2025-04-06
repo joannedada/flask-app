@@ -25,7 +25,7 @@ pipeline {
             }
         }
 
-        stage('Build App') {
+        stage('Setup Environment') {
             steps {
                 script {
                     // Activate the virtual environment and install dependencies
