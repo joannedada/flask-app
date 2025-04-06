@@ -32,7 +32,7 @@ pipeline {
                      sh '''
                     python3 -m venv ./build_venv
                     . ./build_venv/bin/activate
-                    pip install -r ansible/roles/deploy_app/requirements.txt
+                    pip install -r ansible/roles/deploy_app/files/requirements.txt
                     '''
                 }
             }
