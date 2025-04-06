@@ -45,7 +45,7 @@ pipeline {
                     // Run Flake8 to check the entire codebase for style issues
                     sh '''
                     . ./build_venv/bin/activate
-                        flake8 deploy_app/ --count --show-source --statistics
+                        flake8 ansible/roles/deploy_app/ --count --show-source --statistics
                     '''    
                 }
             }
@@ -57,7 +57,7 @@ pipeline {
                     // Run Bandit over the entire codebase to check for security vulnerabilities
                     sh '''
                     . ./build_venv/bin/activate
-                    bandit -r deploy_app/
+                    bandit -r ansible/roles/deploy_app/
                     '''
                 }
             }
