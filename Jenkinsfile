@@ -6,7 +6,7 @@ pipeline {
         S3_BUCKET = 'joanne-artifacts-bucket'
         APP_PATH = "flask-app/${params.APP_VERSION}/flask_app.tar.gz"
         DEPLOY_PATH = "/var/www/flask_app"
-        PATH = "/usr/local/bin:$PATH"
+        PATH = "/usr/bin:$PATH"
     }
 
     parameters {
