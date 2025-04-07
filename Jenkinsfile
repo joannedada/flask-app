@@ -69,7 +69,7 @@ pipeline {
                     // Run pytest for the entire project to execute tests
                     sh '''
                     . ./build_venv/bin/activate
-                    pytest ansible/roles/app/tests/ -v
+                    PYTHONPATH=$PYTHONPATH:. pytest ansible/roles/app/files/tests/ -v
                     '''
                 }
             }
