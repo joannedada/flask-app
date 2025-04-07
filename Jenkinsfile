@@ -112,6 +112,7 @@ pipeline {
                         app_version: "${params.APP_VERSION}",  // Pass the version to Ansible playbook
                         s3_bucket: "${S3_BUCKET}",
                         app_path: "/var/www/flask_app"  // Path where the app will be deployed on the server
+                        s3_key: "flask-app/${params.APP_VERSION}/flask_app.tar.gz"
                     ]
                 } 
             }

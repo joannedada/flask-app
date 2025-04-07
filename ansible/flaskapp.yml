@@ -1,20 +1,87 @@
 ---
+- name: Download from S3
+  hosts: localhost
+  tasks:
+    - name: Get application package
+      community.aws.aws_s3:
+        bucket: "{{ s3_bucket }}"
+        object: "flask-app/{{ app_version }}/flask_app.tar.gz"
+        dest: "/tmp/flask_app_{{ app_version }}.tar.gz"
+        mode: get
+
 - name: Deploy Flask Application
   hosts: flask_servers
   become: yes
-  gather_facts: no  # Temporarily disabled
-  
-  # Global variables (overridable by hosts.ini)
   vars:
-    ansible_python_interpreter: /usr/bin/python3
-    
+    deploy_path: "/var/www/flask_app"
+    temp_path: "/tmp/flask_deploy_{{ app_version }}"
+
+  pre_tasks:
+    - name: Stop existing service
+      systemd:
+        name: flask_app
+        state: stopped
+      ignore_errors: yes
+
+    - name: Clean previous deployment
+      file:
+        path: "{{ deploy_path }}"
+        state: absent
+
+    - name: Copy artifact from Jenkins to target
+      ansible.posix.synchronize:
+        src: "/tmp/flask_app_{{ app_version }}.tar.gz"
+        dest: "/tmp/flask_app_{{ app_version }}.tar.gz"
+        mode: push
+
   roles:
-    - role: python_flask  # Handles Python/Ansible deps + Flask setup
-    - role: configure_app
+    - role: python_flask  # Handles Python/Ansible deps + Flask stack
+    - role: configure_app # Configures DB environment variables
+
+  tasks:
+    - name: Create deployment directory
+      file:
+        path: "{{ deploy_path }}"
+        state: directory
+        owner: ec2-user
+        group: ec2-user
+        mode: '0755'
+
+    - name: Extract application
+      unarchive:
+        src: "/tmp/flask_app_{{ app_version }}.tar.gz"
+        dest: "{{ deploy_path }}"
+        remote_src: yes
+        extra_opts: ["--strip-components=1"]
+        owner: ec2-user
+        group: ec2-user
+
+    - name: Install Python dependencies
+      pip:
+        requirements: "{{ deploy_path }}/requirements.txt"
+        virtualenv: "{{ deploy_path }}/venv"
+        virtualenv_command: python3 -m venv
+        executable: "{{ deploy_path }}/venv/bin/pip"
+
+    - name: Deploy systemd service
+      template:
+        src: "{{ deploy_path }}/flask_app.service.j2"
+        dest: "/etc/systemd/system/flask_app.service"
+        mode: '0644'
+
+    - name: Reload and start service
+      systemd:
+        name: flask_app
+        state: restarted
+        enabled: yes
+        daemon_reload: yes
+
+    - name: Cleanup temp files
+      file:
+        path: "/tmp/flask_app_{{ app_version }}.tar.gz"
+        state: absent
 
 - name: Setup Database Server
   hosts: dbserver
   roles:
     - postgresql
-
-
