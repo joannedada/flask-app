@@ -3,60 +3,28 @@
   become: yes
   vars:
     grafana_version: "10.4.2"
-    grafana_admin_password: "flask123"  # Change this!
 
   tasks:
-    - name: Install prerequisites
-      dnf:
-        name: [wget]
-        state: present
-        update_cache: yes
+    - name: Create swap file (2GB)
+      command: |
+        dd if=/dev/zero of=/swapfile bs=1M count=2048 &&
+        chmod 600 /swapfile &&
+        mkswap /swapfile &&
+        swapon /swapfile
+      args:
+        creates: /swapfile
 
-    - name: Add Grafana repository
-      yum_repository:
-        name: grafana
-        description: Grafana repository
-        baseurl: https://packages.grafana.com/oss/rpm
-        repo_gpgcheck: yes
-        gpgcheck: yes
-        enabled: yes
-        gpgkey: https://packages.grafana.com/gpg.key
-        sslverify: yes
-        sslcacert: /etc/pki/tls/certs/ca-bundle.crt
+    - name: Install Grafana (low-memory mode)
+      command: |
+        dnf install -y \
+        --setopt=install_weak_deps=False \
+        --nogpgcheck \
+        https://dl.grafana.com/oss/release/grafana-{{ grafana_version }}-1.x86_64.rpm
+      args:
+        creates: /usr/sbin/grafana-server
 
-    - name: Install Grafana
-      dnf:
-        name: grafana
-        state: present
-        enablerepo: grafana
-        update_cache: yes
-
-    - name: Configure Grafana (basic settings)
-      lineinfile:
-        path: /etc/grafana/grafana.ini
-        regexp: "^admin_password ="
-        line: "admin_password = {{ grafana_admin_password }}"
-        state: present
-      no_log: true  # Hides password from logs
-      notify: restart grafana
-
-    - name: Create data directory
-      file:
-        path: /var/lib/grafana
-        state: directory
-        owner: grafana
-        group: grafana
-        mode: '0750'
-
-    - name: Ensure Grafana service is running
+    - name: Start Grafana
       systemd:
         name: grafana-server
         state: started
         enabled: yes
-
-  handlers:
-    - name: restart grafana
-      systemd:
-        name: grafana-server
-        state: restarted
-        daemon_reload: yes
