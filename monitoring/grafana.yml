@@ -1,49 +1,62 @@
-- name: Download Grafana
-  get_url:
-    url: "https://dl.grafana.com/oss/release/grafana-{{ grafana_version }}.linux-{{ grafana_arch }}.tar.gz"
-    dest: /tmp/grafana.tar.gz
+---
+- hosts: monitoring_servers
+  become: yes
+  vars:
+    grafana_version: "10.4.2"
+    grafana_admin_password: "flask123"  # Change this!
 
-- name: Extract Grafana
-  unarchive:
-    src: /tmp/grafana.tar.gz
-    dest: /tmp/
-    remote_src: yes
+  tasks:
+    - name: Install prerequisites
+      dnf:
+        name: [wget]
+        state: present
+        update_cache: yes
 
-- name: Install Grafana
-  copy:
-    src: "/tmp/grafana-{{ grafana_version }}/bin/grafana-server"
-    dest: "/usr/local/bin/grafana-server"
-    mode: '0755'
-    remote_src: yes
+    - name: Add Grafana repository
+      yum_repository:
+        name: grafana
+        description: Grafana repository
+        baseurl: https://packages.grafana.com/oss/rpm
+        repo_gpgcheck: yes
+        gpgcheck: yes
+        enabled: yes
+        gpgkey: https://packages.grafana.com/gpg.key
+        sslverify: yes
+        sslcacert: /etc/pki/tls/certs/ca-bundle.crt
 
-- name: Create Grafana directories
-  file:
-    path: "{{ item }}"
-    state: directory
-    mode: '0755'
-  loop:
-    - /etc/grafana
-    - /var/lib/grafana
-    - /var/log/grafana
+    - name: Install Grafana
+      dnf:
+        name: grafana
+        state: present
+        enablerepo: grafana
+        update_cache: yes
 
-- name: Install systemd service file
-  copy:
-    content: |
-      [Unit]
-      Description=Grafana
-      After=network-online.target
+    - name: Configure Grafana (basic settings)
+      lineinfile:
+        path: /etc/grafana/grafana.ini
+        regexp: "^admin_password ="
+        line: "admin_password = {{ grafana_admin_password }}"
+        state: present
+      no_log: true  # Hides password from logs
+      notify: restart grafana
 
-      [Service]
-      User=grafana
-      Group=grafana
-      Type=simple
-      ExecStart=/usr/local/bin/grafana-server \
-          --config=/etc/grafana/grafana.ini \
-          --homepath=/tmp/grafana-{{ grafana_version }} \
-          --packaging=tar.gz
-      Restart=always
+    - name: Create data directory
+      file:
+        path: /var/lib/grafana
+        state: directory
+        owner: grafana
+        group: grafana
+        mode: '0750'
 
-      [Install]
-      WantedBy=multi-user.target
-    dest: /etc/systemd/system/grafana.service
-    mode: '0644'
+    - name: Ensure Grafana service is running
+      systemd:
+        name: grafana-server
+        state: started
+        enabled: yes
+
+  handlers:
+    - name: restart grafana
+      systemd:
+        name: grafana-server
+        state: restarted
+        daemon_reload: yes
