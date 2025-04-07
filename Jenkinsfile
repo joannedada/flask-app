@@ -116,5 +116,43 @@ pipeline {
                 } 
             }
         }
+        stage('Deploy Monitoring') {
+            steps {
+                ansiblePlaybook(
+                    playbook: 'monitoring/prometheus.yml',
+                    inventory: 'ansible/hosts.ini'
+                    extraVars: [
+                        target_hosts: 'monitoring_servers'
+                    ]
+                )
+                ansiblePlaybook(
+                    playbook: 'monitoring/grafana.yml',
+                    inventory: 'ansible/hosts.ini'
+                    extraVars: [
+                        target_hosts: 'monitoring_servers'
+                    ]
+                )
+            }
+        }
+    }
+    post {
+        success {
+            emailext (
+                subject: "✅ SUCCESS: Devopsensei Flask Deployment Job",
+                body: """
+                ${params.APP_VERSION} was successful!!
+                """,
+                to: 'orezikoko@gmail.com'
+            )
+        }
+        failure {
+            emailext (
+                subject: "❌ FAILURE: Devopsensei Flask Deployment Job",
+                body: """
+                The build failed unfortunately. Check Jenkins for details.
+                """,
+                to: 'orezikoko@gmail.com'
+            )
+        }
     }
 }
