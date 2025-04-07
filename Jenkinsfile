@@ -81,8 +81,7 @@ pipeline {
                       // Create clean production artifact
                     sh '''
                     mkdir -p package
-                    cp -r app package/
-                    cp requirements.txt package/
+                    cp -r ansible/roles/app package/
                     cd package && tar -czf ../flask_app.tar.gz .
                     '''
                     
