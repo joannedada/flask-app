@@ -6,5 +6,9 @@ CREATE TABLE IF NOT EXISTS users (
     name VARCHAR(50) UNIQUE
 );
 
-INSERT INTO users (name) VALUES ('Joanne'), ('Abimbola'), ('Paul');
+INSERT INTO users (name)
+VALUES
+('Joanne'),
+('Abimbola'),
+('Paul');
 ON CONFLICT (name) DO NOTHING;
