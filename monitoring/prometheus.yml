@@ -3,7 +3,7 @@
   become: yes
   tasks:
     - name: Install prerequisites
-      apt:
+      dnf:
         name: ["wget", "tar"]
         state: present
         update_cache: yes
