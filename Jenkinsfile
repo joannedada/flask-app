@@ -69,7 +69,6 @@ pipeline {
                     // Run pytest for the entire project to execute tests
                     sh '''
                     . ./build_venv/bin/activate
-                    pip install -e ansible/roles/app/files
                     PYTHONPATH=$PYTHONPATH:. pytest ansible/roles/app/files/tests/ -v || echo "Tests skipped"
                     '''
                 }
