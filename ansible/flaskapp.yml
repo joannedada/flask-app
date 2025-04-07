@@ -1,17 +1,15 @@
 ---
-- name: Deploy Flask application
-  hosts: your_target_hosts  # Replace with your host group from hosts.ini
+- name: Deploy Flask application from S3
+  hosts: all  # or your specific host group
   gather_facts: yes
-  become: yes  # Use sudo privileges
-  
-  collections:
-    - community.aws  # Explicitly declare the collection usage
+  become: yes
 
+  # Modern Ansible versions prefer this syntax for collections
   vars:
-    app_version: "{{ app_version }}"  # Passed from Jenkins
-    s3_bucket: "{{ s3_bucket }}"      # Passed from Jenkins
-    s3_key: "{{ s3_key }}"            # Passed from Jenkins
-    app_path: "{{ app_path }}"        # Passed from Jenkins
+    app_version: "{{ app_version }}"
+    s3_bucket: "{{ s3_bucket }}"
+    s3_key: "{{ s3_key }}"
+    app_path: "{{ app_path }}"
 
   tasks:
     - name: Ensure application directory exists
@@ -19,32 +17,16 @@
         path: "{{ app_path }}"
         state: directory
         mode: '0755'
-        owner: root
-        group: root
 
     - name: Download application package from S3
-      community.aws.aws_s3:
-        bucket: "{{ s3_bucket }}"
-        object: "{{ s3_key }}"
-        dest: "/tmp/flask_app.tar.gz"
-        mode: get
-      register: download_result
+      amazon.aws.aws_s3:
+       bucket: "{{ s3_bucket }}"
+       object: "{{ s3_key }}"
+       dest: "/tmp/flask_app.tar.gz"
+       mode: get
 
     - name: Extract application package
       ansible.builtin.unarchive:
         src: "/tmp/flask_app.tar.gz"
         dest: "{{ app_path }}"
         remote_src: yes
-        creates: "{{ app_path }}/app"  # Change this to a file that would exist after extraction
-
-    - name: Install Python dependencies
-      ansible.builtin.pip:
-        requirements: "{{ app_path }}/requirements.txt"
-        executable: pip3
-
-    - name: Ensure Flask service is running
-      ansible.builtin.systemd:
-        name: flaskapp  # Assuming you have a systemd service file
-        state: restarted
-        enabled: yes
-      when: "'flaskapp' in ansible_facts.services"  # Only if service exists
