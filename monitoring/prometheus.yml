@@ -9,27 +9,28 @@
         update_cache: yes
 
     - name: Download Prometheus
-      get_url:
+      ansible.builtin.get_url:
         url: https://github.com/prometheus/prometheus/releases/download/v2.47.0/prometheus-2.47.0.linux-amd64.tar.gz
         dest: /tmp/prometheus.tar.gz
 
     - name: Extract Prometheus
-      unarchive:
+      ansible.builtin.unarchive:
         src: /tmp/prometheus.tar.gz
         dest: /tmp/
         remote_src: yes
 
     - name: Install Prometheus binaries
-      copy:
+      ansible.builtin.copy:
         src: "/tmp/prometheus-2.47.0.linux-amd64/{{ item }}"
         dest: "/usr/local/bin/{{ item }}"
         mode: '0755'
+        remote_src: yes  # This is the critical fix
       loop:
         - prometheus
         - promtool
 
     - name: Create Prometheus directories
-      file:
+      ansible.builtin.file:
         path: "{{ item }}"
         state: directory
         mode: '0755'
@@ -38,8 +39,10 @@
         - /var/lib/prometheus
 
     - name: Configure Prometheus
-      copy:
+      ansible.builtin.copy:
         content: |
+          global:
+            scrape_interval: 15s
           scrape_configs:
             - job_name: 'flask-app'
               static_configs:
@@ -49,7 +52,7 @@
 
   handlers:
     - name: restart prometheus
-      systemd:
+      ansible.builtin.systemd:
         name: prometheus
         state: restarted
         enabled: yes
