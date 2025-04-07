@@ -6,7 +6,7 @@
     prometheus_arch: "linux-amd64"
   tasks:
     - name: Install prerequisites
-      yum:
+      dnf:
         name: ["wget", "tar"]
         state: present
         update_cache: yes
@@ -43,7 +43,7 @@
 
     - name: Install systemd service file
       template:
-        src: prometheus.service.j2
+        src: monitoring/prometheus.service.j2
         dest: /etc/systemd/system/prometheus.service
         mode: '0644'
       notify: reload systemd and start prometheus
