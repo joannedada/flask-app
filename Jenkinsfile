@@ -116,26 +116,28 @@ pipeline {
                 } 
             }
         }
-        stage('Deploy Monitoring') {
+       stage('Deploy Monitoring') {
             steps {
                 ansiblePlaybook(
                     playbook: 'monitoring/prometheus.yml',
-                    inventory: 'ansible/hosts.ini'
-                    extraVars: (
+                    inventory: 'ansible/hosts.ini',
+                    extraVars: [
                         target_hosts: 'monitoring_servers'
+                    ]
                 )
-            )
 
                 ansiblePlaybook(
                     playbook: 'monitoring/grafana.yml',
-                    inventory: 'ansible/hosts.ini'
-                    extraVars: (
+                    inventory: 'ansible/hosts.ini',
+                    extraVars: [
                         target_hosts: 'monitoring_servers'
-                    )
+                    ]
                 )
             }
         }
+
     }
+
     post {
         success {
             emailext (
