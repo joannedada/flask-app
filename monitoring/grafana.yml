@@ -3,7 +3,7 @@
   become: yes
   tasks:
     - name: Install Grafana
-      apt:
+      yum:
         name: grafana
         state: present
 
