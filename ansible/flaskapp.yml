@@ -12,27 +12,28 @@
     s3_key: "{{ s3_key | default('flask-app/' + app_version + '/flask_app.tar.gz') }}"
     app_path: "{{ app_path | default('/var/www/flask_app') }}"
     temp_download_path: "/tmp/flask_app.tar.gz"
-    
-- name: Download application package from S3
-  community.aws.s3_object:
-        bucket: "{{ s3_bucket }}"
-        object: "{{ s3_key }}"
-        dest: "{{ temp_download_path }}"
-        mode: get
-  register: download_result
-  retries: 3
-  delay: 10
-  until: download_result is succeeded
-  notify: Clean up temporary package
 
-- name: Extract application package
-  ansible.builtin.unarchive:
-        src: "{{ temp_download_path }}"
-        dest: "{{ app_path }}"
-        remote_src: yes
-        owner: "{{ app_user | default('www-data') }}"
-        group: "{{ app_group | default('www-data') }}"
-        creates: "{{ app_path }}/app.py"  # Change to your main app file
+  tasks:  
+    - name: Download application package from S3
+      community.aws.s3_object:
+            bucket: "{{ s3_bucket }}"
+            object: "{{ s3_key }}"
+            dest: "{{ temp_download_path }}"
+            mode: get
+      register: download_result
+      retries: 3
+      delay: 10
+      until: download_result is succeeded
+      notify: Clean up temporary package
+
+    - name: Extract application package
+      ansible.builtin.unarchive:
+            src: "{{ temp_download_path }}"
+            dest: "{{ app_path }}"
+            remote_src: yes
+            owner: "{{ app_user | default('www-data') }}"
+            group: "{{ app_group | default('www-data') }}"
+            creates: "{{ app_path }}/app.py"  # Change to your main app file
  
   roles:
     - role: python_flask  # Handles Python/Ansible deps + Flask setup
