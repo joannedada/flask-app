@@ -118,7 +118,7 @@ pipeline {
                 }
             }
         }
-        }
+    
        stage('Deploy Monitoring') {
             steps {
                 ansiblePlaybook(
