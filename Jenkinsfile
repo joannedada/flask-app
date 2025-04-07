@@ -106,7 +106,7 @@ pipeline {
                     }
                     // Deploy the app using Ansible (now that the app is uploaded to S3)
                     sh '''
-                    ansible-playbook /home/jenkins-agent/workspace/testjob/ansible/flaskapp.yml -i hosts.ini
+                    ansible-playbook /home/jenkins-agent/workspace/testjob/ansible/flaskapp.yml -i /home/jenkins-agent/workspace/testjob/ansible/hosts.ini
                     '''
                     extraVars: [
                         app_version: "${params.APP_VERSION}",  // Pass the version to Ansible playbook
