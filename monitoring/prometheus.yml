@@ -1,5 +1,5 @@
 ---
-- hosts: monitoring_server
+- hosts: monitoring_servers
   become: yes
   tasks:
     - name: Install Prometheus
@@ -17,7 +17,7 @@
         dest: /etc/prometheus/prometheus.yml
       notify: restart prometheus
 
-      handlers:
+  handlers:
       - name: restart prometheus
         service:
           name: prometheus
