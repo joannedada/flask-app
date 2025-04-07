@@ -105,16 +105,15 @@ pipeline {
                     }
                     // Deploy the app using Ansible (now that the app is uploaded to S3)
                     echo "Deploying App version: ${params.APP_VERSION} to Flask server"
-                    ansiblePlaybook(
-                        export PATH=/home/ubuntu/.local/bin:$PATH
-                        inventory: 'hosts.ini',
-                        playbook: 'flaskapp.yml',  // Your Ansible playbook
+                    sh '''
+                    export PATH=/home/ubuntu/.local/bin:$PATH
+                    ansible-playbook flaskapp.yml -i hosts.ini
+                    '''
                         extraVars: [
                             app_version: "${params.APP_VERSION}",  // Pass the version to Ansible playbook
                             s3_bucket: "${S3_BUCKET}",
                             app_path: "/var/www/flask_app"  // Path where the app will be deployed on the server
                         ]
-                    )
                 } 
             }
         }
