@@ -14,27 +14,36 @@
     temp_download_path: "/tmp/flask_app.tar.gz"
 
   tasks:  
-    - name: Download application package from S3
-      community.aws.s3_object:
-            bucket: "{{ s3_bucket }}"
-            object: "{{ s3_key }}"
-            dest: "{{ temp_download_path }}"
-            mode: get
-      register: download_result
-      retries: 3
-      delay: 10
-      until: download_result is succeeded
-      notify: Clean up temporary package
+     - name: Install required Python packages
+       ansible.builtin.pip:
+        name:
+          - boto3
+          - botocore
+        state: present
 
-    - name: Extract application package
-      ansible.builtin.unarchive:
-            src: "{{ temp_download_path }}"
-            dest: "{{ app_path }}"
-            remote_src: yes
-            owner: "{{ app_user | default('www-data') }}"
-            group: "{{ app_group | default('www-data') }}"
-            creates: "{{ app_path }}/app.py"  # Change to your main app file
- 
+     - name: Download from S3 using boto
+       ansible.builtin.aws_s3:
+        bucket: "{{ s3_bucket }}"
+        object: "{{ s3_key }}"
+        dest: "{{ temp_download_path }}"
+        mode: get
+        register: download_result
+        retries: 3
+        delay: 10
+        until: download_result is succeeded
+
+     - name: Extract application
+       ansible.builtin.unarchive:
+        src: "{{ temp_download_path }}"
+        dest: "{{ app_path }}"
+        remote_src: yes
+        creates: "{{ app_path }}/app.py"
+
+     - name: Cleanup temp file
+       ansible.builtin.file:
+        path: "{{ temp_download_path }}"
+        state: absent
+
   roles:
     - role: python_flask  # Handles Python/Ansible deps + Flask setup
     - role: configure_app
