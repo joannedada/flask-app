@@ -104,6 +104,12 @@ pipeline {
                     withAWS(credentials: 'aws-credentials', region: 'us-east-1'){
                         sh 'aws s3 cp s3://${S3_BUCKET}/${APP_PATH} ./downloaded_app.tar.gz'
                     }
+                        sh '''
+                        sudo systemctl stop flask-app  # Stop service first
+                        rm -rf /var/www/flask_app/*
+                        tar -xzf ./downloaded_app.tar.gz -C /var/www/flask_app --overwrite
+                        sudo systemctl restart flask-app
+                        '''
                     // Deploy the app using Ansible (now that the app is uploaded to S3)
                     sh '''
                     ansible-playbook /home/jenkins-agent/workspace/testjob/ansible/flaskapp.yml -i /home/jenkins-agent/workspace/testjob/ansible/hosts.ini
