@@ -1,32 +1,44 @@
 ---
-- name: Deploy Flask application from S3
-  hosts: all  # or your specific host group
-  gather_facts: yes
+- name: Deploy Flask Application
+  hosts: flask_servers
   become: yes
-
-  # Modern Ansible versions prefer this syntax for collections
+  gather_facts: no  # Temporarily disabled
+  
+  # Global variables (overridable by hosts.ini)
   vars:
-    app_version: "{{ app_version }}"
-    s3_bucket: "{{ s3_bucket }}"
-    s3_key: "{{ s3_key }}"
-    app_path: "{{ app_path }}"
+    ansible_python_interpreter: /usr/bin/python3
+    app_version: "{{ app_version | default('latest') }}"
+    s3_bucket: "{{ s3_bucket | default('joanne-artifacts-bucket') }}"
+    s3_key: "{{ s3_key | default('flask-app/' + app_version + '/flask_app.tar.gz') }}"
+    app_path: "{{ app_path | default('/var/www/flask_app') }}"
+    temp_download_path: "/tmp/flask_app.tar.gz"
+    
+- name: Download application package from S3
+  community.aws.s3_object:
+        bucket: "{{ s3_bucket }}"
+        object: "{{ s3_key }}"
+        dest: "{{ temp_download_path }}"
+        mode: get
+  register: download_result
+  retries: 3
+  delay: 10
+  until: download_result is succeeded
+  notify: Clean up temporary package
 
-  tasks:
-    - name: Ensure application directory exists
-      ansible.builtin.file:
-        path: "{{ app_path }}"
-        state: directory
-        mode: '0755'
-
-    - name: Download application package from S3
-      amazon.aws.aws_s3:
-       bucket: "{{ s3_bucket }}"
-       object: "{{ s3_key }}"
-       dest: "/tmp/flask_app.tar.gz"
-       mode: get
-
-    - name: Extract application package
-      ansible.builtin.unarchive:
-        src: "/tmp/flask_app.tar.gz"
+- name: Extract application package
+  ansible.builtin.unarchive:
+        src: "{{ temp_download_path }}"
         dest: "{{ app_path }}"
         remote_src: yes
+        owner: "{{ app_user | default('www-data') }}"
+        group: "{{ app_group | default('www-data') }}"
+        creates: "{{ app_path }}/app.py"  # Change to your main app file
+ 
+  roles:
+    - role: python_flask  # Handles Python/Ansible deps + Flask setup
+    - role: configure_app
+
+- name: Setup Database Server
+  hosts: dbserver
+  roles:
+    - postgresql
