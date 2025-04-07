@@ -104,7 +104,6 @@ pipeline {
                         sh 'aws s3 cp s3://${S3_BUCKET}/${APP_PATH} ./downloaded_app.tar.gz'
                     }
                     // Deploy the app using Ansible (now that the app is uploaded to S3)
-                    echo "Deploying App version: ${params.APP_VERSION} to Flask server"
                     sh '''
                     export PATH=/home/ubuntu/.local/bin:$PATH
                     ansible-playbook flaskapp.yml -i hosts.ini
