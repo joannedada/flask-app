@@ -4,6 +4,7 @@ import config
 
 app = Flask(__name__)
 
+
 def get_team_members():
     conn = psycopg2.connect(
         host=config.DB_HOST,
@@ -18,10 +19,13 @@ def get_team_members():
     conn.close()
     return members
 
+
 @app.route("/")
 def home():
     team_members = get_team_members()
     return render_template("index.html", team_members=team_members)
 
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
+    
