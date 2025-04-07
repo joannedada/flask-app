@@ -10,7 +10,6 @@
     
   roles:
     - role: python_flask  # Handles Python/Ansible deps + Flask setup
-    - role: deploy_app    # Handles application deployment
     - role: configure_app
 
 - name: Setup Database Server
