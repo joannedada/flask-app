@@ -1,0 +1,30 @@
+---
+- hosts: monitoring_servers
+  become: yes
+  vars:
+    grafana_version: "10.4.2"
+
+  tasks:
+    - name: Create swap file (2GB)
+      command: |
+        dd if=/dev/zero of=/swapfile bs=1M count=2048 &&
+        chmod 600 /swapfile &&
+        mkswap /swapfile &&
+        swapon /swapfile
+      args:
+        creates: /swapfile
+
+    - name: Install Grafana (low-memory mode)
+      command: |
+        dnf install -y \
+        --setopt=install_weak_deps=False \
+        --nogpgcheck \
+        https://dl.grafana.com/oss/release/grafana-{{ grafana_version }}-1.x86_64.rpm
+      args:
+        creates: /usr/sbin/grafana-server
+
+    - name: Start Grafana
+      systemd:
+        name: grafana-server
+        state: started
+        enabled: yes

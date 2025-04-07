@@ -16,6 +16,24 @@
     enabled: yes
   become: yes
 
+- name: Ensure devopsdb database exists
+  become: yes
+  become_user: postgres
+  postgresql_db:
+    name: devopsdb
+    state: present
+
+- name: Create users table if it doesn't exist
+  become: yes
+  become_user: postgres
+  postgresql_query:
+    db: devopsdb
+    query: |
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(50) UNIQUE
+      );
+  
 - name: Copy init.sql to the server
   copy:
     src: files/init.sql
@@ -25,7 +43,7 @@
     mode: '0644'
   become: yes
 
-- name: Run init.sql script
+- name: Run init.sql script to populate users
   become: yes
   become_user: postgres
   command: psql -U postgres -f /tmp/init.sql
