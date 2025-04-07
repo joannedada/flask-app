@@ -121,16 +121,17 @@ pipeline {
                 ansiblePlaybook(
                     playbook: 'monitoring/prometheus.yml',
                     inventory: 'ansible/hosts.ini'
-                    extraVars: [
+                    extraVars: (
                         target_hosts: 'monitoring_servers'
-                    ]
                 )
+            )
+
                 ansiblePlaybook(
                     playbook: 'monitoring/grafana.yml',
                     inventory: 'ansible/hosts.ini'
-                    extraVars: [
+                    extraVars: (
                         target_hosts: 'monitoring_servers'
-                    ]
+                    )
                 )
             }
         }
