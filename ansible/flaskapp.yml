@@ -1,87 +1,50 @@
 ---
-- name: Download from S3
-  hosts: localhost
+- name: Deploy Flask application
+  hosts: your_target_hosts  # Replace with your host group from hosts.ini
+  gather_facts: yes
+  become: yes  # Use sudo privileges
+  
+  collections:
+    - community.aws  # Explicitly declare the collection usage
+
+  vars:
+    app_version: "{{ app_version }}"  # Passed from Jenkins
+    s3_bucket: "{{ s3_bucket }}"      # Passed from Jenkins
+    s3_key: "{{ s3_key }}"            # Passed from Jenkins
+    app_path: "{{ app_path }}"        # Passed from Jenkins
+
   tasks:
-    - name: Get application package
+    - name: Ensure application directory exists
+      ansible.builtin.file:
+        path: "{{ app_path }}"
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+
+    - name: Download application package from S3
       community.aws.aws_s3:
         bucket: "{{ s3_bucket }}"
-        object: "flask-app/{{ app_version }}/flask_app.tar.gz"
-        dest: "/tmp/flask_app_{{ app_version }}.tar.gz"
+        object: "{{ s3_key }}"
+        dest: "/tmp/flask_app.tar.gz"
         mode: get
+      register: download_result
 
-- name: Deploy Flask Application
-  hosts: flask_servers
-  become: yes
-  vars:
-    deploy_path: "/var/www/flask_app"
-    temp_path: "/tmp/flask_deploy_{{ app_version }}"
-
-  pre_tasks:
-    - name: Stop existing service
-      systemd:
-        name: flask_app
-        state: stopped
-      ignore_errors: yes
-
-    - name: Clean previous deployment
-      file:
-        path: "{{ deploy_path }}"
-        state: absent
-
-    - name: Copy artifact from Jenkins to target
-      ansible.posix.synchronize:
-        src: "/tmp/flask_app_{{ app_version }}.tar.gz"
-        dest: "/tmp/flask_app_{{ app_version }}.tar.gz"
-        mode: push
-
-  roles:
-    - role: python_flask  # Handles Python/Ansible deps + Flask stack
-    - role: configure_app # Configures DB environment variables
-
-  tasks:
-    - name: Create deployment directory
-      file:
-        path: "{{ deploy_path }}"
-        state: directory
-        owner: ec2-user
-        group: ec2-user
-        mode: '0755'
-
-    - name: Extract application
-      unarchive:
-        src: "/tmp/flask_app_{{ app_version }}.tar.gz"
-        dest: "{{ deploy_path }}"
+    - name: Extract application package
+      ansible.builtin.unarchive:
+        src: "/tmp/flask_app.tar.gz"
+        dest: "{{ app_path }}"
         remote_src: yes
-        extra_opts: ["--strip-components=1"]
-        owner: ec2-user
-        group: ec2-user
+        creates: "{{ app_path }}/app"  # Change this to a file that would exist after extraction
 
     - name: Install Python dependencies
-      pip:
-        requirements: "{{ deploy_path }}/requirements.txt"
-        virtualenv: "{{ deploy_path }}/venv"
-        virtualenv_command: python3 -m venv
-        executable: "{{ deploy_path }}/venv/bin/pip"
+      ansible.builtin.pip:
+        requirements: "{{ app_path }}/requirements.txt"
+        executable: pip3
 
-    - name: Deploy systemd service
-      template:
-        src: "{{ deploy_path }}/flask_app.service.j2"
-        dest: "/etc/systemd/system/flask_app.service"
-        mode: '0644'
-
-    - name: Reload and start service
-      systemd:
-        name: flask_app
+    - name: Ensure Flask service is running
+      ansible.builtin.systemd:
+        name: flaskapp  # Assuming you have a systemd service file
         state: restarted
         enabled: yes
-        daemon_reload: yes
-
-    - name: Cleanup temp files
-      file:
-        path: "/tmp/flask_app_{{ app_version }}.tar.gz"
-        state: absent
-
-- name: Setup Database Server
-  hosts: dbserver
-  roles:
-    - postgresql
+      when: "'flaskapp' in ansible_facts.services"  # Only if service exists
