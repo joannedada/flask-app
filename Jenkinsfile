@@ -100,11 +100,9 @@ pipeline {
         stage('Download & Deploy') {
             steps {
                 script {
-                     withAWS(credentials: 'aws-credentials', region: 'us-east-1')
+                    withAWS(credentials: 'aws-credentials', region: 'us-east-1')
                         sh 'aws s3 cp s3://${S3_BUCKET}/${APP_PATH} ./downloaded_app.tar.gz'
                     }
-            }
-
                     // Deploy the app using Ansible (now that the app is uploaded to S3)
                     echo "Deploying App version: ${params.APP_VERSION} to Flask server"
                     ansiblePlaybook(
@@ -118,3 +116,4 @@ pipeline {
                 } 
             }
         }
+} 
