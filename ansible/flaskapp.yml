@@ -1,4 +1,11 @@
 ---
+- name: Install required collections
+  hosts: localhost
+  tasks:
+    - name: Install community.aws collection
+      ansible.builtin.command: ansible-galaxy collection install community.aws
+      changed_when: false
+      
 - name: Download from S3
   hosts: localhost
   tasks:
