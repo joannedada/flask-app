@@ -1,4 +1,4 @@
-from ansible.roles.app.files.app import app 
+from ansible.roles.app.files.app import app
 
 
 def test_home_route():
