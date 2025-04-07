@@ -4,8 +4,7 @@ import config
 
 app = Flask(__name__)
 
-
-def get_users():
+def get_team_members():
     conn = psycopg2.connect(
         host=config.DB_HOST,
         database=config.DB_NAME,
@@ -13,18 +12,16 @@ def get_users():
         password=config.DB_PASS
     )
     cur = conn.cursor()
-    cur.execute("SELECT name FROM users")
-    rows = cur.fetchall()
+    cur.execute("SELECT name, role FROM users")  # Modified to include roles
+    members = [{"name": row[0], "role": row[1]} for row in cur.fetchall()]
     cur.close()
     conn.close()
-    return [row[0] for row in rows]
-
+    return members
 
 @app.route("/")
 def home():
-    users = get_users()
-    return render_template("index.html", users=users)
-
+    team_members = get_team_members()
+    return render_template("index.html", team_members=team_members)
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)  # nosec B104
+    app.run(host='0.0.0.0', port=5000)

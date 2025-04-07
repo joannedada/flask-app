@@ -1,15 +1,242 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>DevOps Students</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOps Engineer Team</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #0D1117;
+            color: white;
+            overflow: hidden;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            z-index: 1;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        h1 {
+            font-size: 48px;
+            background: linear-gradient(90deg, #4D68FF 0%, #06D6FF 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 40px;
+            text-shadow: 0 0 10px rgba(77, 104, 255, 0.3);
+        }
+        h2 {
+            font-size: 32px;
+            color: #C9D1D9;
+            margin-bottom: 40px;
+        }
+        .team-members {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+        .member-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 30px;
+            min-width: 250px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .member-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(6, 214, 255, 0.2);
+        }
+        .member-name {
+            font-size: 24px;
+            color: #06D6FF;
+            margin-bottom: 10px;
+        }
+        .member-title {
+            font-size: 18px;
+            color: #C9D1D9;
+        }
+        .quote {
+            text-align: center;
+            font-style: italic;
+            font-size: 20px;
+            color: #C9D1D9;
+            margin-top: 40px;
+        }
+        /* Dynamic Animated Background */
+        .animated-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: linear-gradient(125deg,
+                #0D1117, #162344, #0A2955, #043270, #104584, #0A3B7D,
+                #083061, #091D45, #14142D, #0D1117
+            );
+            background-size: 2000% 2000%;
+            animation: gradient-animation 30s ease infinite alternate;
+        }
+        @keyframes gradient-animation {
+            0% { background-position: 0% 0%; }
+            20% { background-position: 100% 20%; }
+            40% { background-position: 20% 60%; }
+            60% { background-position: 60% 100%; }
+            80% { background-position: 100% 40%; }
+            100% { background-position: 0% 80%; }
+        }
+        /* Enhanced Code matrix overlay */
+        .code-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image:
+                radial-gradient(circle, rgba(6, 214, 255, 0.05) 1px, transparent 1px),
+                radial-gradient(circle, rgba(77, 104, 255, 0.04) 1px, transparent 1px);
+            background-size: 30px 30px, 25px 25px;
+            background-position: 0 0, 15px 15px;
+            opacity: 0.6;
+            animation: code-animation 15s linear infinite;
+        }
+        @keyframes code-animation {
+            0% { background-position: 0 0, 15px 15px; }
+            100% { background-position: 30px 30px, 45px 45px; }
+        }
+        /* Binary code falling effect */
+        .binary-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            opacity: 0.3;
+        }
+        .binary-column {
+            position: absolute;
+            top: -100px;
+            color: rgba(6, 214, 255, 0.4);
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 20px;
+            white-space: nowrap;
+            animation: rain linear infinite;
+        }
+        @keyframes rain {
+            from {
+                transform: translateY(-100px);
+            }
+            to {
+                transform: translateY(100vh);
+            }
+        }
+        /* Floating orbs */
+        .orbs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.2;
+            animation: float-around 25s infinite ease-in-out;
+        }
+        @keyframes float-around {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(50px, 100px); }
+            50% { transform: translate(100px, -50px); }
+            75% { transform: translate(-50px, -100px); }
+            100% { transform: translate(0, 0); }
+        }
+    </style>
 </head>
 <body>
-  <h1>I am almost a DevOps Engineer!</h1>
-  <h2>Current Users:</h2>
-  <ul>
-    {% for user in users %}
-      <li>{{ user }}</li>
-    {% endfor %}
-  </ul>
+    <div class="animated-background"></div>
+    <div class="code-overlay"></div>
+    <div class="binary-rain"></div>
+    <div class="orbs"></div>
+    <div class="container">
+        <div class="header">
+            <h1>We are almost DevOps Engineers</h1>
+            <h2>DevOps Engineer Team</h2>
+        </div>
+        <div class="team-members">
+            {% for member in team_members %}
+            <div class="member-card">
+                <div class="member-name">{{ member.name }}</div>
+                <div class="member-title">{{ member.role }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="quote">
+            "Infrastructure as code, automation as culture, excellence as standard."
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create binary rain effect
+            const binaryRain = document.querySelector('.binary-rain');
+            const columnCount = 25;
+            for (let i = 0; i < columnCount; i++) {
+                const column = document.createElement('div');
+                column.classList.add('binary-column');
+                // Generate random binary string
+                let binaryString = '';
+                for (let j = 0; j < 100; j++) {
+                    binaryString += Math.random() > 0.5 ? '1' : '0';
+                    binaryString += ' ';
+                }
+                column.textContent = binaryString;
+                column.style.left = (i * 100 / columnCount) + '%';
+                column.style.animationDuration = (Math.random() * 40 + 20) + 's';
+                binaryRain.appendChild(column);
+            }
+            // Create floating orbs
+            const orbs = document.querySelector('.orbs');
+            const orbCount = 5;
+            const colors = ['#4D68FF', '#06D6FF', '#0044AA', '#0088CC', '#5544FF'];
+            for (let i = 0; i < orbCount; i++) {
+                const orb = document.createElement('div');
+                orb.classList.add('orb');
+                const size = Math.random() * 300 + 100;
+                orb.style.width = size + 'px';
+                orb.style.height = size + 'px';
+                orb.style.left = Math.random() * 100 + 'vw';
+                orb.style.top = Math.random() * 100 + 'vh';
+                orb.style.backgroundColor = colors[i % colors.length];
+                orb.style.animationDelay = (i * -5) + 's';
+                orb.style.animationDuration = (Math.random() * 20 + 15) + 's';
+                orbs.appendChild(orb);
+            }
+        });
+    </script>
 </body>
 </html>

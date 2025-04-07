@@ -10,7 +10,7 @@ pipeline {
     }
 
     parameters {
-        string(name: 'APP_VERSION', defaultValue: 'v1.0.1', description: 'App version to deploy')
+        string(name: 'APP_VERSION', defaultValue: 'v1.0.2', description: 'App version to deploy')
     }
 
     tools {
