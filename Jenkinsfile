@@ -6,6 +6,7 @@ pipeline {
         S3_BUCKET = 'joanne-artifacts-bucket'
         APP_PATH = "flask-app/${params.APP_VERSION}/flask_app.tar.gz"
         DEPLOY_PATH = "/var/www/flask_app"
+        PATH = "/usr/local/bin:$PATH"
     }
 
     parameters {
@@ -105,7 +106,6 @@ pipeline {
                     }
                     // Deploy the app using Ansible (now that the app is uploaded to S3)
                     sh '''
-                    export PATH=/home/ubuntu/.local/bin:$PATH
                     ansible-playbook flaskapp.yml -i hosts.ini
                     '''
                     extraVars: [
