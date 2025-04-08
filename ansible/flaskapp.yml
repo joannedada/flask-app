@@ -2,48 +2,18 @@
 - name: Deploy Flask Application
   hosts: flask_servers
   become: yes
-  gather_facts: no
+  gather_facts: no  # Temporarily disabled
   
+  # Global variables (overridable by hosts.ini)
   vars:
     ansible_python_interpreter: /usr/bin/python3
-    app_version: "{{ app_version }}"
-    s3_bucket: "{{ s3_bucket }}"
-    s3_key: "{{ s3_key }}"
-    app_path: "{{ app_path }}"
-    temp_download_path: "/tmp/flask_app.tar.gz"
-
-  tasks:
-    - name: Install boto3 and botocore
-      ansible.builtin.pip:
-          name:
-            - boto3
-            - botocore
-          executable: pip3
-
-    - name: Download from S3 using EC2 Instance Role
-      ansible.builtin.aws_s3:
-          bucket: "{{ s3_bucket }}"
-          object: "{{ s3_key }}"
-          dest: "/tmp/flask_app.tar.gz"
-          mode: get
-
-    - name: Extract application
-      ansible.builtin.unarchive:
-        src: "{{ temp_download_path }}"
-        dest: "{{ app_path }}"
-        remote_src: yes
-        creates: "{{ app_path }}/app.py"
-
-    - name: Cleanup temp file
-      ansible.builtin.file:
-        path: "{{ temp_download_path }}"
-        state: absent
-
+    
   roles:
-    - role: python_flask
+    - role: python_flask  # Handles Python/Ansible deps + Flask setup
+    - role: deploy_app    # Handles application deployment
     - role: configure_app
 
 - name: Setup Database Server
-  hosts: dbserver
+  hosts: db_server
   roles:
     - postgresql
