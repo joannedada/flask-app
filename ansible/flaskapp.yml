@@ -13,6 +13,13 @@
     temp_download_path: "/tmp/flask_app.tar.gz"
 
   tasks:
+    - name: Install boto3 and botocore
+      ansible.builtin.pip:
+          name:
+            - boto3
+            - botocore
+          executable: pip3
+
     - name: Download from S3 using EC2 Instance Role
       ansible.builtin.aws_s3:
           bucket: "{{ s3_bucket }}"
