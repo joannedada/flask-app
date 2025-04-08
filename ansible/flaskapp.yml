@@ -9,8 +9,7 @@
     ansible_python_interpreter: /usr/bin/python3
     
   roles:
-    - role: python_flask  # Handles Python/Ansible deps + Flask setup
-    - role: deploy_app    # Handles application deployment
+    - role: python_flask  
     - role: configure_app
 
 - name: Setup Database Server
