@@ -13,29 +13,12 @@
     temp_download_path: "/tmp/flask_app.tar.gz"
 
   tasks:
-    - name: Install required Python packages
-      ansible.builtin.pip:
-        name:
-          - boto3
-          - botocore
-        state: present
-
-    - name: Download from S3 using boto
-      block:
-        - name: Attempt S3 download
-          ansible.builtin.aws_s3:
-            bucket: "{{ s3_bucket }}"
-            object: "{{ s3_key }}"
-            dest: "{{ temp_download_path }}"
-            mode: get
-          register: download_result
-          retries: 3
-          ignore_errors: yes
-
-        - name: Fail if download unsuccessful
-          ansible.builtin.fail:
-            msg: "Failed to download from S3 after multiple attempts"
-          when: download_result is failed
+    - name: Download from S3 using EC2 Instance Role
+      ansible.builtin.aws_s3:
+          bucket: "{{ s3_bucket }}"
+          object: "{{ s3_key }}"
+          dest: "/tmp/flask_app.tar.gz"
+          mode: get
 
     - name: Extract application
       ansible.builtin.unarchive:
