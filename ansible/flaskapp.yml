@@ -2,50 +2,55 @@
 - name: Deploy Flask Application
   hosts: flask_servers
   become: yes
-  gather_facts: no  # Temporarily disabled
+  gather_facts: no
   
-  # Global variables (overridable by hosts.ini)
   vars:
     ansible_python_interpreter: /usr/bin/python3
-    app_version: "{{ app_version | default('latest') }}"
-    s3_bucket: "{{ s3_bucket | default('joanne-artifacts-bucket') }}"
-    s3_key: "{{ s3_key | default('flask-app/' + app_version + '/flask_app.tar.gz') }}"
-    app_path: "{{ app_path | default('/var/www/flask_app') }}"
+    app_version: "{{ app_version }}"
+    s3_bucket: "{{ s3_bucket }}"
+    s3_key: "{{ s3_key }}"
+    app_path: "{{ app_path }}"
     temp_download_path: "/tmp/flask_app.tar.gz"
 
-  tasks:  
-     - name: Install required Python packages
-       ansible.builtin.pip:
+  tasks:
+    - name: Install required Python packages
+      ansible.builtin.pip:
         name:
           - boto3
           - botocore
         state: present
 
-     - name: Download from S3 using boto
-       ansible.builtin.aws_s3:
-        bucket: "{{ s3_bucket }}"
-        object: "{{ s3_key }}"
-        dest: "{{ temp_download_path }}"
-        mode: get
-        register: download_result
-        retries: 3
-        delay: 10
-        until: download_result is succeeded
+    - name: Download from S3 using boto
+      block:
+        - name: Attempt S3 download
+          ansible.builtin.aws_s3:
+            bucket: "{{ s3_bucket }}"
+            object: "{{ s3_key }}"
+            dest: "{{ temp_download_path }}"
+            mode: get
+          register: download_result
+          retries: 3
+          ignore_errors: yes
 
-     - name: Extract application
-       ansible.builtin.unarchive:
+        - name: Fail if download unsuccessful
+          ansible.builtin.fail:
+            msg: "Failed to download from S3 after multiple attempts"
+          when: download_result is failed
+
+    - name: Extract application
+      ansible.builtin.unarchive:
         src: "{{ temp_download_path }}"
         dest: "{{ app_path }}"
         remote_src: yes
         creates: "{{ app_path }}/app.py"
 
-     - name: Cleanup temp file
-       ansible.builtin.file:
+    - name: Cleanup temp file
+      ansible.builtin.file:
         path: "{{ temp_download_path }}"
         state: absent
 
   roles:
-    - role: python_flask  # Handles Python/Ansible deps + Flask setup
+    - role: python_flask
     - role: configure_app
 
 - name: Setup Database Server
