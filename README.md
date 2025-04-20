@@ -1,6 +1,3 @@
----
-
-```markdown
 # Flask App Deployment Pipeline 🚀
 
 This repository contains a Python Flask application along with a CI/CD pipeline using **Jenkins**, **Ansible**, **Terraform**, and **AWS S3** for versioned deployments.
