@@ -1,4 +1,4 @@
-# Flask App Deployment Pipeline 🚀
+# Flask App Deployment Pipeline 
 
 This repository contains a Python Flask application along with a CI/CD pipeline using **Jenkins**, **Ansible**, **Terraform**, and **AWS S3** for versioned deployments.
 
@@ -23,7 +23,7 @@ flask-app/
 
 ---
 
-## 🚀 Features
+##  Features
 
 - Flask web application
 - Virtual environment setup using Ansible
@@ -36,7 +36,7 @@ flask-app/
 
 ---
 
-## 🧪 Testing and Quality
+##  Testing and Quality
 
 ### ✅ Run Linting
 ```bash
@@ -115,11 +115,6 @@ DB_PASS = "your-db-password"
 ## 🧑‍💻 Author
 
 *Your Name*  
-[GitHub](https://github.com/your-username)
+[GitHub](https://github.com/joannedada)
 
----
-
-## 📜 License
-
-This project is licensed under the MIT License.
 ```
