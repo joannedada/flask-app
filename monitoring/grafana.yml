@@ -5,14 +5,27 @@
     grafana_version: "10.4.2"
 
   tasks:
-    - name: Create swap file (2GB)
+    - name: Check for existing swap
+      stat:
+        path: /swapfile
+      register: swapfile_exists
+
+    - name: Create swap file (2GB) if missing
       command: |
         dd if=/dev/zero of=/swapfile bs=1M count=2048 &&
         chmod 600 /swapfile &&
         mkswap /swapfile &&
         swapon /swapfile
+      when: not swapfile_exists.stat.exists
       args:
         creates: /swapfile
+
+    - name: Ensure swap is in fstab
+      lineinfile:
+        path: /etc/fstab
+        line: '/swapfile none swap sw 0 0'
+        regexp: '^/swapfile'
+        state: present
 
     - name: Install Grafana (low-memory mode)
       command: |

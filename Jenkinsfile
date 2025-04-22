@@ -10,7 +10,7 @@ pipeline {
     }
 
     parameters {
-        string(name: 'APP_VERSION', defaultValue: 'v1.0.1', description: 'App version to deploy')
+        string(name: 'APP_VERSION', defaultValue: 'v1.0.2', description: 'App version to deploy')
     }
 
     tools {
@@ -101,21 +101,24 @@ pipeline {
         stage('Download & Deploy') {
             steps {
                 script {
-                    withAWS(credentials: 'aws-credentials', region: 'us-east-1'){
+                    withAWS(credentials: 'aws-credentials', region: 'us-east-1') {
+                        // Download the artifact
                         sh 'aws s3 cp s3://${S3_BUCKET}/${APP_PATH} ./downloaded_app.tar.gz'
+                        
+                        // Use ansiblePlaybook step (not sh) for proper extraVars handling
+                        ansiblePlaybook(
+                            playbook: '/home/jenkins-agent/workspace/testjob/ansible/flaskapp.yml',
+                            inventory: '/home/jenkins-agent/workspace/testjob/ansible/hosts.ini',
+                            extras: '-e "app_version=${params.APP_VERSION}" ' +
+                                '-e "s3_bucket=${S3_BUCKET}" ' +
+                                '-e "app_path=/var/www/flask_app" ' +
+                                '-e "s3_key=flask-app/${params.APP_VERSION}/flask_app.tar.gz"'
+                        )
                     }
-                    // Deploy the app using Ansible (now that the app is uploaded to S3)
-                    sh '''
-                    ansible-playbook /home/jenkins-agent/workspace/testjob/ansible/flaskapp.yml -i /home/jenkins-agent/workspace/testjob/ansible/hosts.ini
-                    '''
-                    extraVars: [
-                        app_version: "${params.APP_VERSION}",  // Pass the version to Ansible playbook
-                        s3_bucket: "${S3_BUCKET}",
-                        app_path: "/var/www/flask_app"  // Path where the app will be deployed on the server
-                    ]
-                } 
+                }
             }
         }
+    
        stage('Deploy Monitoring') {
             steps {
                 ansiblePlaybook(
