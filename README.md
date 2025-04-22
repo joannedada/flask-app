@@ -114,7 +114,7 @@ DB_PASS = "your-db-password"
 
 ## 🧑‍💻 Author
 
-*Your Name*  
+*Joanne*  
 [GitHub](https://github.com/joannedada)
 
 ```
